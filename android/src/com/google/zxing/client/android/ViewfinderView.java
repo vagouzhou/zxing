@@ -19,7 +19,6 @@ package com.google.zxing.client.android;
 import com.google.zxing.ResultPoint;
 import com.google.zxing.client.android.camera.CameraManager;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -69,7 +68,7 @@ public final class ViewfinderView extends View {
     laserColor = resources.getColor(R.color.viewfinder_laser);
     resultPointColor = resources.getColor(R.color.possible_result_points);
     scannerAlpha = 0;
-    possibleResultPoints = new ArrayList<>(5);
+    possibleResultPoints = new ArrayList<ResultPoint>(5);
     lastPossibleResultPoints = null;
   }
 
@@ -77,7 +76,6 @@ public final class ViewfinderView extends View {
     this.cameraManager = cameraManager;
   }
 
-  @SuppressLint("DrawAllocation")
   @Override
   public void onDraw(Canvas canvas) {
     if (cameraManager == null) {
@@ -121,7 +119,7 @@ public final class ViewfinderView extends View {
       if (currentPossible.isEmpty()) {
         lastPossibleResultPoints = null;
       } else {
-        possibleResultPoints = new ArrayList<>(5);
+        possibleResultPoints = new ArrayList<ResultPoint>(5);
         lastPossibleResultPoints = currentPossible;
         paint.setAlpha(CURRENT_POINT_OPACITY);
         paint.setColor(resultPointColor);

@@ -38,9 +38,12 @@ public final class ClipboardInterface {
     if (text != null) {
       try {
         getManager(context).setPrimaryClip(ClipData.newPlainText(null, text));
-      } catch (NullPointerException | IllegalStateException e) {
+      } catch (NullPointerException npe) {
         // Have seen this in the wild, bizarrely
-        Log.w(TAG, "Clipboard bug", e);
+        Log.w(TAG, "Clipboard bug", npe);
+      } catch (IllegalStateException ise) {
+        // java.lang.IllegalStateException: beginBroadcast() called while already in a broadcast
+        Log.w(TAG, "Clipboard bug", ise);
       }
     }
   }

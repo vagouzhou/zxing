@@ -29,16 +29,14 @@ import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.common.SummaryResults;
 import com.google.zxing.common.TestResult;
 
-import com.google.zxing.multi.MultipleBarcodeReader;
 import org.junit.Test;
 
 import javax.imageio.ImageIO;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -55,16 +53,27 @@ import java.util.logging.Logger;
  * several barcodes can be properly combined again to yield the original data content.
  * 
  * @author Guenther Grau
+ *
  */
 public final class PDF417BlackBox4TestCase extends AbstractBlackBoxTestCase {
   private static final Logger log = Logger.getLogger(AbstractBlackBoxTestCase.class.getSimpleName());
 
-  private final MultipleBarcodeReader barcodeReader = new PDF417Reader();
+  private static final Charset UTF8 = Charset.forName("UTF-8");
+  private static final Charset ISO88591 = Charset.forName("ISO-8859-1");
+  private static final String TEST_BASE_PATH_SUFFIX = "src/test/resources/blackbox/pdf417-4";
+  private final PDF417Reader barcodeReader = new PDF417Reader();
 
-  private final List<TestResult> testResults = new ArrayList<>();
+  private final List<TestResult> testResults = new ArrayList<TestResult>();
+  private File testBase;
 
   public PDF417BlackBox4TestCase() {
-    super("src/test/resources/blackbox/pdf417-4", null, BarcodeFormat.PDF_417);
+    super(TEST_BASE_PATH_SUFFIX, null, BarcodeFormat.PDF_417);
+    // A little workaround to prevent aggravation in my IDE
+    testBase = new File(TEST_BASE_PATH_SUFFIX);
+    if (!testBase.exists()) {
+      // try starting with 'core' since the test base is often given as the project root
+      testBase = new File("core/" + TEST_BASE_PATH_SUFFIX);
+    }
     testResults.add(new TestResult(2, 2, 0, 0, 0.0f));
   }
 
@@ -74,10 +83,10 @@ public final class PDF417BlackBox4TestCase extends AbstractBlackBoxTestCase {
     testPDF417BlackBoxCountingResults(true);
   }
 
-  SummaryResults testPDF417BlackBoxCountingResults(boolean assertOnFailure) throws IOException {
+  public SummaryResults testPDF417BlackBoxCountingResults(boolean assertOnFailure) throws IOException {
     assertFalse(testResults.isEmpty());
 
-    Map<String,List<Path>> imageFiles = getImageFileLists();
+    Map<String,List<File>> imageFiles = getImageFileLists();
     int testCount = testResults.size();
 
     int[] passedCounts = new int[testCount];
@@ -85,26 +94,24 @@ public final class PDF417BlackBox4TestCase extends AbstractBlackBoxTestCase {
     int[] tryHarderCounts = new int[testCount];
     int[] tryHaderMisreadCounts = new int[testCount];
 
-    Path testBase = getTestBase();
-
-    for (Entry<String,List<Path>> testImageGroup : imageFiles.entrySet()) {
+    for (Entry<String,List<File>> testImageGroup : imageFiles.entrySet()) {
       log.fine(String.format("Starting Image Group %s", testImageGroup.getKey()));
 
       String fileBaseName = testImageGroup.getKey();
       String expectedText;
-      Path expectedTextFile = testBase.resolve(fileBaseName + ".txt");
-      if (Files.exists(expectedTextFile)) {
-        expectedText = readFileAsString(expectedTextFile, StandardCharsets.UTF_8);
+      File expectedTextFile = new File(testBase, fileBaseName + ".txt");
+      if (expectedTextFile.exists()) {
+        expectedText = readFileAsString(expectedTextFile, UTF8);
       } else {
-        expectedTextFile = testBase.resolve(fileBaseName + ".bin");
-        assertTrue(Files.exists(expectedTextFile));
-        expectedText = readFileAsString(expectedTextFile, StandardCharsets.ISO_8859_1);
+        expectedTextFile = new File(testBase, fileBaseName + ".bin");
+        assertTrue(expectedTextFile.exists());
+        expectedText = readFileAsString(expectedTextFile, ISO88591);
       }
 
       for (int x = 0; x < testCount; x++) {
-        List<Result> results = new ArrayList<>();
-        for (Path imageFile : testImageGroup.getValue()) {
-          BufferedImage image = ImageIO.read(imageFile.toFile());
+        List<Result> results = new ArrayList<Result>();
+        for (File imageFile : testImageGroup.getValue()) {
+          BufferedImage image = ImageIO.read(imageFile);
           float rotation = testResults.get(x).getRotation();
           BufferedImage rotatedImage = rotateImage(image, rotation);
           LuminanceSource source = new BufferedImageLuminanceSource(rotatedImage);
@@ -204,7 +211,7 @@ public final class PDF417BlackBox4TestCase extends AbstractBlackBoxTestCase {
   }
 
   private Result[] decode(BinaryBitmap source, boolean tryHarder) throws ReaderException {
-    Map<DecodeHintType,Object> hints = new EnumMap<>(DecodeHintType.class);
+    Map<DecodeHintType,Object> hints = new EnumMap<DecodeHintType,Object>(DecodeHintType.class);
     if (tryHarder) {
       hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
     }
@@ -212,14 +219,14 @@ public final class PDF417BlackBox4TestCase extends AbstractBlackBoxTestCase {
     return barcodeReader.decodeMultiple(source, hints);
   }
 
-  private Map<String,List<Path>> getImageFileLists() throws IOException {
-    Map<String,List<Path>> result = new HashMap<>();
-    for (Path file : getImageFiles()) {
-      String testImageFileName = file.getFileName().toString();
+  private Map<String,List<File>> getImageFileLists() {
+    Map<String,List<File>> result = new HashMap<String,List<File>>();
+    for (File file : getImageFiles()) {
+      String testImageFileName = file.getName();
       String fileBaseName = testImageFileName.substring(0, testImageFileName.indexOf('-'));
-      List<Path> files = result.get(fileBaseName);
+      List<File> files = result.get(fileBaseName);
       if (files == null) {
-        files = new ArrayList<>();
+        files = new ArrayList<File>();
         result.put(fileBaseName, files);
       }
       files.add(file);

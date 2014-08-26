@@ -26,6 +26,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -66,7 +67,7 @@ public final class SearchBookContentsActivity extends Activity {
   private TextView headerView;
   private AsyncTask<String,?,?> networkTask;
 
-  private final View.OnClickListener buttonListener = new View.OnClickListener() {
+  private final Button.OnClickListener buttonListener = new Button.OnClickListener() {
     @Override
     public void onClick(View view) {
       launchSearch();
@@ -211,7 +212,7 @@ public final class SearchBookContentsActivity extends Activity {
         if (count > 0) {
           JSONArray results = json.getJSONArray("search_results");
           SearchBookContentsResult.setQuery(queryTextView.getText().toString());
-          List<SearchBookContentsResult> items = new ArrayList<>(count);
+          List<SearchBookContentsResult> items = new ArrayList<SearchBookContentsResult>(count);
           for (int x = 0; x < count; x++) {
             items.add(parseResult(results.getJSONObject(x)));
           }

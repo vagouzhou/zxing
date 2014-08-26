@@ -18,7 +18,6 @@ package com.google.zxing.pdf417.decoder.ec;
 
 import com.google.zxing.ChecksumException;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Random;
@@ -50,7 +49,7 @@ public final class ErrorCorrectionTestCase extends AbstractErrorCorrectionTestCa
   private static final int EC_LEVEL = 5;
   private static final int ERROR_LIMIT = (1 << (EC_LEVEL + 1)) - 3;
   private static final int MAX_ERRORS = ERROR_LIMIT / 2;
-  private static final int MAX_ERASURES = ERROR_LIMIT;
+  //private static final int MAX_ERASURES = ERROR_LIMIT;
 
   private final ErrorCorrection ec = new ErrorCorrection();
 
@@ -81,13 +80,11 @@ public final class ErrorCorrectionTestCase extends AbstractErrorCorrectionTestCa
     }
   }
 
-  @Ignore("Unresolved flakiness with OpenJDK 7 only")
   @Test
   public void testTooManyErrors() {
     int[] received = PDF417_TEST_WITH_EC.clone();
     Random random = getRandom();
-    // +3 since the algorithm can actually correct 2 more than it should here
-    corrupt(received, MAX_ERRORS + 3, random);
+    corrupt(received, MAX_ERRORS + 3, random); // +3 since the algo can actually correct 2 more than it should here
     try {
       checkDecode(received);
       fail("Should not have decoded");
@@ -96,7 +93,7 @@ public final class ErrorCorrectionTestCase extends AbstractErrorCorrectionTestCa
     }
   }
 
-  @Ignore("Erasures not implemented yet")
+  /*
   @Test
   public void testMaxErasures() throws ChecksumException {
     Random random = getRandom();
@@ -107,7 +104,6 @@ public final class ErrorCorrectionTestCase extends AbstractErrorCorrectionTestCa
     }
   }
 
-  @Ignore("Erasures not implemented yet")
   @Test
   public void testTooManyErasures() {
     Random random = getRandom();
@@ -120,6 +116,7 @@ public final class ErrorCorrectionTestCase extends AbstractErrorCorrectionTestCa
       // good
     }
   }
+   */
 
   private void checkDecode(int[] received) throws ChecksumException {
     checkDecode(received, new int[0]);

@@ -55,20 +55,8 @@ public final class MatrixToImageConfig {
   }
 
   int getBufferedImageColorModel() {
-    if (onColor == BLACK && offColor == WHITE) {
-      // Use faster BINARY if colors match default
-      return BufferedImage.TYPE_BYTE_BINARY;
-    }
-    if (hasTransparency(onColor) || hasTransparency(offColor)) {
-      // Use ARGB representation if colors specify non-opaque alpha
-      return BufferedImage.TYPE_INT_ARGB;
-    }
-    // Default otherwise to RGB representation with ignored alpha channel
-    return BufferedImage.TYPE_INT_RGB;
-  }
-
-  private static boolean hasTransparency(int argb) {
-    return (argb & 0xFF000000) != 0xFF000000;
+    // Use faster BINARY if colors match default
+    return onColor == BLACK && offColor == WHITE ? BufferedImage.TYPE_BYTE_BINARY : BufferedImage.TYPE_INT_RGB;
   }
 
 }

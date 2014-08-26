@@ -20,7 +20,7 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
 
-import java.nio.file.Paths;
+import java.io.File;
 import java.util.Locale;
 
 /**
@@ -90,8 +90,9 @@ public final class CommandLineEncoder {
       outFileString += '.' + imageFormat.toLowerCase(Locale.ENGLISH);
     }
     
-    BitMatrix matrix = new MultiFormatWriter().encode(contents, barcodeFormat, width, height);
-    MatrixToImageWriter.writeToPath(matrix, imageFormat, Paths.get(outFileString));
+    MultiFormatWriter barcodeWriter = new MultiFormatWriter();
+    BitMatrix matrix = barcodeWriter.encode(contents, barcodeFormat, width, height);
+    MatrixToImageWriter.writeToFile(matrix, imageFormat, new File(outFileString));
   }
 
   private static void printUsage() {

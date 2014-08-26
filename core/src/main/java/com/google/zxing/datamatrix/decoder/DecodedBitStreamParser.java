@@ -83,7 +83,7 @@ final class DecodedBitStreamParser {
     BitSource bits = new BitSource(bytes);
     StringBuilder result = new StringBuilder(100);
     StringBuilder resultTrailer = new StringBuilder(0);
-    List<byte[]> byteSegments = new ArrayList<>(1);
+    List<byte[]> byteSegments = new ArrayList<byte[]>(1);
     Mode mode = Mode.ASCII_ENCODE;
     do {
       if (mode == Mode.ASCII_ENCODE) {
@@ -112,7 +112,7 @@ final class DecodedBitStreamParser {
       }
     } while (mode != Mode.PAD_ENCODE && bits.available() > 0);
     if (resultTrailer.length() > 0) {
-      result.append(resultTrailer);
+      result.append(resultTrailer.toString());
     }
     return new DecoderResult(bytes, result.toString(), byteSegments.isEmpty() ? null : byteSegments, null);
   }

@@ -14,8 +14,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
  -->
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-       xmlns:tools="http://schemas.android.com/tools">
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
 
   <SurfaceView android:id="@+id/preview_view"
                android:layout_width="fill_parent"
@@ -55,8 +54,7 @@
                    android:maxHeight="150dip"
                    android:layout_marginBottom="@dimen/half_padding"
                    android:adjustViewBounds="true"
-                   android:scaleType="centerInside"
-                   tools:ignore="ContentDescription"/>
+                   android:scaleType="centerInside"/>
 
         <LinearLayout
           android:orientation="horizontal"
@@ -153,8 +151,7 @@
                     android:textColorLink="@color/result_text"
                     android:textSize="22sp"
                     android:paddingLeft="12dip"
-                    android:autoLink="web"
-                    android:textIsSelectable="true"/>
+                    android:autoLink="web"/>
 
           <TextView android:id="@+id/contents_supplement_text_view"
                     android:layout_width="wrap_content"
@@ -163,7 +160,7 @@
                     android:textColorLink="@color/result_text"
                     android:paddingLeft="12dip"
                     android:autoLink="web"
-                    android:textIsSelectable="true"/>
+                    android:clickable="true"/>
 
         </LinearLayout>
 

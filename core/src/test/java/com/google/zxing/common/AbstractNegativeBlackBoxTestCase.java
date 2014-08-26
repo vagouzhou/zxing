@@ -27,8 +27,8 @@ import org.junit.Test;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -68,7 +68,7 @@ public abstract class AbstractNegativeBlackBoxTestCase extends AbstractBlackBoxT
   // Use the multiformat reader to evaluate all decoders in the system.
   protected AbstractNegativeBlackBoxTestCase(String testBasePathSuffix) {
     super(testBasePathSuffix, new MultiFormatReader(), null);
-    testResults = new ArrayList<>();
+    testResults = new ArrayList<TestResult>();
   }
 
   protected final void addTest(int falsePositivesAllowed, float rotation) {
@@ -80,11 +80,11 @@ public abstract class AbstractNegativeBlackBoxTestCase extends AbstractBlackBoxT
   public void testBlackBox() throws IOException {
     assertFalse(testResults.isEmpty());
 
-    List<Path> imageFiles = getImageFiles();
+    File[] imageFiles = getImageFiles();
     int[] falsePositives = new int[testResults.size()];
-    for (Path testImage : imageFiles) {
-      log.info(String.format("Starting %s", testImage));
-      BufferedImage image = ImageIO.read(testImage.toFile());
+    for (File testImage : imageFiles) {
+      log.info(String.format("Starting %s", testImage.getAbsolutePath()));
+      BufferedImage image = ImageIO.read(testImage);
       if (image == null) {
         throw new IOException("Could not read image: " + testImage);
       }
@@ -114,7 +114,7 @@ public abstract class AbstractNegativeBlackBoxTestCase extends AbstractBlackBoxT
     for (int x = 0; x < testResults.size(); x++) {
       TestResult testResult = testResults.get(x);
       log.info(String.format("Rotation %d degrees: %d of %d images were false positives (%d allowed)",
-                             (int) testResult.getRotation(), falsePositives[x], imageFiles.size(),
+                             (int) testResult.getRotation(), falsePositives[x], imageFiles.length,
                              testResult.getFalsePositivesAllowed()));
       assertTrue("Rotation " + testResult.getRotation() + " degrees: Too many false positives found",
                  falsePositives[x] <= testResult.getFalsePositivesAllowed());
@@ -143,7 +143,7 @@ public abstract class AbstractNegativeBlackBoxTestCase extends AbstractBlackBoxT
     }
 
     // Try "try harder" getMode
-    Map<DecodeHintType,Object> hints = new EnumMap<>(DecodeHintType.class);
+    Map<DecodeHintType,Object> hints = new EnumMap<DecodeHintType,Object>(DecodeHintType.class);
     hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
     try {
       result = getReader().decode(bitmap, hints);

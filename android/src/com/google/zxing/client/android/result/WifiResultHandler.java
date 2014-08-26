@@ -30,7 +30,7 @@ import com.google.zxing.client.result.ParsedResult;
 import com.google.zxing.client.result.WifiParsedResult;
 
 /**
- * Handles wifi access information.
+ * Handles address book entries.
  *
  * @author Vikram Aggarwal
  * @author Sean Owen
@@ -82,7 +82,12 @@ public final class WifiResultHandler extends ResultHandler {
   @Override
   public CharSequence getDisplayContents() {
     WifiParsedResult wifiResult = (WifiParsedResult) getResult();
-    return wifiResult.getSsid() + " (" + wifiResult.getNetworkEncryption() + ')';
+    StringBuilder contents = new StringBuilder(50);
+    String wifiLabel = parent.getString(R.string.wifi_ssid_label);
+    ParsedResult.maybeAppend(wifiLabel + '\n' + wifiResult.getSsid(), contents);
+    String typeLabel = parent.getString(R.string.wifi_type_label);
+    ParsedResult.maybeAppend(typeLabel + '\n' + wifiResult.getNetworkEncryption(), contents);
+    return contents.toString();
   }
 
   @Override

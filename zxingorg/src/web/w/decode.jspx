@@ -64,7 +64,7 @@
         </form>
         <form action="decode" method="post" enctype="multipart/form-data">
           <tr>
-            <td style="text-align:right">Or upload a file (&amp;lt;10MB, &amp;lt;10MP):</td>
+            <td style="text-align:right">Or upload a file (&amp;lt;2MB, &amp;lt;8MP):</td>
             <td><input type="file" name="f"/></td>
             <td><input type="submit"/></td>
           </tr>
@@ -72,13 +72,14 @@
       </table>
 
       <p>This web application is powered by the barcode scanning implementation in the
-        open source <a href="http://github.com/zxing/zxing">ZXing</a> project.</p>
+        open source <a href="http://code.google.com/p/zxing">ZXing</a> project.</p>
       <p>Android users may download the
         <a href="https://play.google.com/store/apps/details?id=com.google.zxing.client.android">Barcode Scanner</a> or
         <a href="https://play.google.com/store/apps/details?id=com.srowen.bs.android">Barcode Scanner+</a> application
         to access the same decoding as a mobile application.</p>
       <p style="font-style:italic">Copyright 2008 and onwards ZXing authors</p>
     </div>
+    <jsp:include page="analytics.jspx"/>
   </body>
 </html>
 </jsp:root>

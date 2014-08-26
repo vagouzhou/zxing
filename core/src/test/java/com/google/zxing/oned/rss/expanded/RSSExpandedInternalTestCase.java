@@ -27,10 +27,7 @@
 package com.google.zxing.oned.rss.expanded;
 
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,11 +52,19 @@ public final class RSSExpandedInternalTestCase extends Assert {
 
   @Test
   public void testFindFinderPatterns() throws Exception {
-    BufferedImage image = readImage("2.png");
+
+    String path = "src/test/resources/blackbox/rssexpanded-1/2.png";
+    File file = new File(path);
+    if (!file.exists()) {
+      // Support running from project root too
+      file = new File("core", path);
+    }
+
+    BufferedImage image = ImageIO.read(file);
     BinaryBitmap binaryMap = new BinaryBitmap(new GlobalHistogramBinarizer(new BufferedImageLuminanceSource(image)));
     int rowNumber = binaryMap.getHeight() / 2;
     BitArray row = binaryMap.getBlackRow(rowNumber, null);
-    List<ExpandedPair> previousPairs = new ArrayList<>();
+    List<ExpandedPair> previousPairs = new ArrayList<ExpandedPair>();
 
     RSSExpandedReader rssExpandedReader = new RSSExpandedReader();
     ExpandedPair pair1 = rssExpandedReader.retrieveNextPair(row, previousPairs, rowNumber);
@@ -91,11 +96,19 @@ public final class RSSExpandedInternalTestCase extends Assert {
 
   @Test
   public void testRetrieveNextPairPatterns() throws Exception {
-    BufferedImage image = readImage("3.png");
+
+    String path = "src/test/resources/blackbox/rssexpanded-1/3.png";
+    File file = new File(path);
+    if (!file.exists()) {
+      // Support running from project root too
+      file = new File("core", path);
+    }
+
+    BufferedImage image = ImageIO.read(file);
     BinaryBitmap binaryMap = new BinaryBitmap(new GlobalHistogramBinarizer(new BufferedImageLuminanceSource(image)));
     int rowNumber = binaryMap.getHeight() / 2;
     BitArray row = binaryMap.getBlackRow(rowNumber, null);
-    List<ExpandedPair> previousPairs = new ArrayList<>();
+    List<ExpandedPair> previousPairs = new ArrayList<ExpandedPair>();
 
     RSSExpandedReader rssExpandedReader = new RSSExpandedReader();
     ExpandedPair pair1 = rssExpandedReader.retrieveNextPair(row, previousPairs, rowNumber);
@@ -113,7 +126,15 @@ public final class RSSExpandedInternalTestCase extends Assert {
 
   @Test
   public void testDecodeCheckCharacter() throws Exception {
-    BufferedImage image = readImage("3.png");
+
+    String path = "src/test/resources/blackbox/rssexpanded-1/3.png";
+    File file = new File(path);
+    if (!file.exists()) {
+      // Support running from project root too
+      file = new File("core", path);
+    }
+
+    BufferedImage image = ImageIO.read(file);
     BinaryBitmap binaryMap = new BinaryBitmap(new GlobalHistogramBinarizer(new BufferedImageLuminanceSource(image)));
     BitArray row = binaryMap.getBlackRow(binaryMap.getHeight() / 2, null);
 
@@ -129,7 +150,15 @@ public final class RSSExpandedInternalTestCase extends Assert {
 
   @Test
   public void testDecodeDataCharacter() throws Exception {
-    BufferedImage image = readImage("3.png");
+
+    String path = "src/test/resources/blackbox/rssexpanded-1/3.png";
+    File file = new File(path);
+    if (!file.exists()) {
+      // Support running from project root too
+      file = new File("core", path);
+    }
+
+    BufferedImage image = ImageIO.read(file);
     BinaryBitmap binaryMap = new BinaryBitmap(new GlobalHistogramBinarizer(new BufferedImageLuminanceSource(image)));
     BitArray row = binaryMap.getBlackRow(binaryMap.getHeight() / 2, null);
 
@@ -143,15 +172,4 @@ public final class RSSExpandedInternalTestCase extends Assert {
     assertEquals(19, dataCharacter.getValue());
     assertEquals(1007, dataCharacter.getChecksumPortion());
   }
-
-  private static BufferedImage readImage(String fileName) throws IOException {
-    Path path = Paths.get("src/test/resources/blackbox/rssexpanded-1/").resolve(fileName);
-    if (!Files.exists(path)) {
-      // Support running from project root too
-      path = Paths.get("core").resolve(path);
-    }
-
-    return ImageIO.read(path.toFile());
-  }
-
 }

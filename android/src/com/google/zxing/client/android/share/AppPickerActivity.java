@@ -24,11 +24,9 @@ import android.view.View;
 import android.widget.Adapter;
 import android.widget.ListView;
 
-import java.util.List;
-
 public final class AppPickerActivity extends ListActivity {
 
-  private AsyncTask<Object,Object,List<AppInfo>> backgroundTask;
+  private AsyncTask<?,?,?> backgroundTask;
 
   @Override
   protected void onResume() {

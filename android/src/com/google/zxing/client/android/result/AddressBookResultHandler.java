@@ -140,13 +140,15 @@ public final class AddressBookResultHandler extends ResultHandler {
                    addressResult.getGeo());
         break;
       case 1:
-        searchMap(address1);
+        String[] names = addressResult.getNames();
+        String title = names != null ? names[0] : null;
+        searchMap(address1, title);
         break;
       case 2:
         dialPhone(addressResult.getPhoneNumbers()[0]);
         break;
       case 3:
-        sendEmail(addressResult.getEmails(), null, null, null, null);
+        sendEmail(addressResult.getEmails()[0], null, null);
         break;
       default:
         break;

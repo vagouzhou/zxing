@@ -60,7 +60,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;
@@ -86,10 +85,10 @@ public final class DecodeServlet extends HttpServlet {
 
   private static final Logger log = Logger.getLogger(DecodeServlet.class.getName());
 
-  // No real reason to let people upload more than a 10MB image
-  private static final long MAX_IMAGE_SIZE = 10_000_000L;
-  // No real reason to deal with more than maybe 10 megapixels
-  private static final int MAX_PIXELS = 10_000_000;
+  // No real reason to let people upload more than a 4MB image
+  private static final long MAX_IMAGE_SIZE = 4000000L;
+  // No real reason to deal with more than maybe 8.3 megapixels
+  private static final int MAX_PIXELS = 1 << 23;
   private static final byte[] REMAINDER_BUFFER = new byte[32768];
   private static final Map<DecodeHintType,Object> HINTS;
   private static final Map<DecodeHintType,Object> HINTS_PURE;
@@ -114,18 +113,14 @@ public final class DecodeServlet extends HttpServlet {
     FileCleaningTracker fileCleaningTracker = FileCleanerCleanup.getFileCleaningTracker(context);
     diskFileItemFactory = new DiskFileItemFactory(1 << 16, repository);
     diskFileItemFactory.setFileCleaningTracker(fileCleaningTracker);
-
-    URL blockURL = context.getClassLoader().getResource("/private/uri-block-substrings.txt");
-    if (blockURL == null) {
-      blockedURLSubstrings = Collections.emptyList();
-    } else {
-      try {
-        blockedURLSubstrings = Resources.readLines(blockURL, StandardCharsets.UTF_8);
-      } catch (IOException ioe) {
-        throw new ServletException(ioe);
-      }
-      log.info("Blocking URIs containing: " + blockedURLSubstrings);
+    
+    try {
+      blockedURLSubstrings =
+          Resources.readLines(Resources.getResource("/private/uri-block-substrings.txt"), StandardCharsets.UTF_8);
+    } catch (IOException ioe) {
+      throw new ServletException(ioe);
     }
+    log.info("Blocking URIs containing: " + blockedURLSubstrings);
   }
 
   @Override
@@ -182,13 +177,6 @@ public final class DecodeServlet extends HttpServlet {
       return;
     }
 
-    String protocol = imageURL.getProtocol();
-    if (!"http".equalsIgnoreCase(protocol) && !"https".equalsIgnoreCase(protocol)) {
-      log.info("URI was not valid: " + imageURIString);
-      response.sendRedirect("badurl.jspx");
-      return;
-    }
-
     HttpURLConnection connection;
     try {
       connection = (HttpURLConnection) imageURL.openConnection();
@@ -205,20 +193,25 @@ public final class DecodeServlet extends HttpServlet {
     connection.setRequestProperty(HttpHeaders.CONNECTION, "close");
 
     try {
-      connection.connect();
-    } catch (IOException ioe) {
-      // Encompasses lots of stuff, including
-      //  java.net.SocketException, java.net.UnknownHostException,
-      //  javax.net.ssl.SSLPeerUnverifiedException,
-      //  org.apache.http.NoHttpResponseException,
-      //  org.apache.http.client.ClientProtocolException,
-      log.info(ioe.toString());
-      response.sendRedirect("badurl.jspx");
-      return;
-    }
 
-    try (InputStream is = connection.getInputStream()) {
       try {
+        connection.connect();
+      } catch (IOException ioe) {
+        // Encompasses lots of stuff, including
+        //  java.net.SocketException, java.net.UnknownHostException,
+        //  javax.net.ssl.SSLPeerUnverifiedException,
+        //  org.apache.http.NoHttpResponseException,
+        //  org.apache.http.client.ClientProtocolException,
+        log.info(ioe.toString());
+        response.sendRedirect("badurl.jspx");
+        return;
+      }
+
+      InputStream is = null;
+      try {
+
+        is = connection.getInputStream();
+
         if (connection.getResponseCode() != HttpServletResponse.SC_OK) {
           log.info("Unsuccessful return code: " + connection.getResponseCode());
           response.sendRedirect("badurl.jspx");
@@ -232,12 +225,17 @@ public final class DecodeServlet extends HttpServlet {
 
         log.info("Decoding " + imageURL);
         processStream(is, request, response);
+
+      } catch (IOException ioe) {
+        log.info(ioe.toString());
+        response.sendRedirect("badurl.jspx");
       } finally {
-        consumeRemainder(is);
+        if (is != null) {
+          consumeRemainder(is);
+          is.close();
+        }
       }
-    } catch (IOException ioe) {
-      log.info(ioe.toString());
-      response.sendRedirect("badurl.jspx");
+
     } finally {
       connection.disconnect();
     }

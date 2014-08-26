@@ -26,14 +26,12 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import java.io.Closeable;
 import java.io.IOException;
 
 /**
  * Manages beeps and vibrations for {@link CaptureActivity}.
  */
-final class BeepManager implements
-    MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, Closeable {
+final class BeepManager implements MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
 
   private static final String TAG = BeepManager.class.getSimpleName();
 
@@ -90,21 +88,18 @@ final class BeepManager implements
     mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
     mediaPlayer.setOnCompletionListener(this);
     mediaPlayer.setOnErrorListener(this);
+
+    AssetFileDescriptor file = activity.getResources().openRawResourceFd(R.raw.beep);
     try {
-      AssetFileDescriptor file = activity.getResources().openRawResourceFd(R.raw.beep);
-      try {
-        mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
-      } finally {
-        file.close();
-      }
+      mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
+      file.close();
       mediaPlayer.setVolume(BEEP_VOLUME, BEEP_VOLUME);
       mediaPlayer.prepare();
-      return mediaPlayer;
     } catch (IOException ioe) {
       Log.w(TAG, ioe);
-      mediaPlayer.release();
-      return null;
+      mediaPlayer = null;
     }
+    return mediaPlayer;
   }
 
   @Override
@@ -125,14 +120,6 @@ final class BeepManager implements
       updatePrefs();
     }
     return true;
-  }
-
-  @Override
-  public synchronized void close() {
-    if (mediaPlayer != null) {
-      mediaPlayer.release();
-      mediaPlayer = null;
-    }
   }
 
 }

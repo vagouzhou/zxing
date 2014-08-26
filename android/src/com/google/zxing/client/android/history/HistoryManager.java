@@ -67,6 +67,8 @@ public final class HistoryManager {
 
   private static final String[] ID_COL_PROJECTION = { DBHelper.ID_COL };
   private static final String[] ID_DETAIL_COL_PROJECTION = { DBHelper.ID_COL, DBHelper.DETAILS_COL };
+  private static final DateFormat EXPORT_DATE_TIME_FORMAT =
+      DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
 
   private final Activity activity;
 
@@ -90,7 +92,7 @@ public final class HistoryManager {
 
   public List<HistoryItem> buildHistoryItems() {
     SQLiteOpenHelper helper = new DBHelper(activity);
-    List<HistoryItem> items = new ArrayList<>();
+    List<HistoryItem> items = new ArrayList<HistoryItem>();
     SQLiteDatabase db = null;
     Cursor cursor = null;
     try {
@@ -284,7 +286,6 @@ public final class HistoryManager {
                         null, null, null, null,
                         DBHelper.TIMESTAMP_COL + " DESC");
 
-      DateFormat format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
       StringBuilder historyText = new StringBuilder(1000);
       while (cursor.moveToNext()) {
 
@@ -296,7 +297,7 @@ public final class HistoryManager {
         // Add timestamp again, formatted
         long timestamp = cursor.getLong(3);
         historyText.append('"').append(massageHistoryField(
-            format.format(new Date(timestamp)))).append("\",");
+            EXPORT_DATE_TIME_FORMAT.format(new Date(timestamp)))).append("\",");
 
         // Above we're preserving the old ordering of columns which had formatted data in position 5
 
