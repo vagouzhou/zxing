@@ -1156,7 +1156,14 @@
 				"VALID_ARCHS[sdk=iphoneos*]" = "armv7 armv7s";
 				"VALID_ARCHS[sdk=iphonesimulator*]" = i386;
 				"VALID_ARCHS[sdk=macosx*]" = "i386 x86_64";
-				WARNING_CFLAGS = "-Wall";
+				WARNING_CFLAGS = (
+					"-Wall",
+					"-Wunused-parameter",
+					"-Wno-unused-private-field",
+					"-Wextra",
+					"-Werror",
+					"-w",
+				);
 			};
 			name = Debug;
 		};
@@ -1191,7 +1198,14 @@
 				"VALID_ARCHS[sdk=iphoneos*]" = "armv7 armv7s";
 				"VALID_ARCHS[sdk=iphonesimulator*]" = i386;
 				"VALID_ARCHS[sdk=macosx*]" = "i386 x86_64";
-				WARNING_CFLAGS = "-Wall";
+				WARNING_CFLAGS = (
+					"-Wall",
+					"-Wunused-parameter",
+					"-Wno-unused-private-field",
+					"-Wextra",
+					"-Werror",
+					"-w",
+				);
 			};
 			name = Release;
 		};
